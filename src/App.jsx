@@ -1,4 +1,4 @@
-import { Mail, MoveRight } from 'lucide-react';
+import { Code2, Github, Linkedin, Mail, MoveRight } from 'lucide-react';
 import Lenis from 'lenis';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
