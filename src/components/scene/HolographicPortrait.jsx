@@ -1,74 +1,44 @@
-import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef } from 'react';
+import portraitImg from '/ashwin-portrait.jpg';
 
 const ACCENT_CYAN = '#00f0ff';
 const ACCENT_PURPLE = '#a855f7';
 
-/* ─── Particles canvas — floating cyan/purple data dots ─── */
-function ParticlesOverlay({ pointerRef, containerRef }) {
+/* ─── Floating particles ─── */
+function ParticlesOverlay() {
   const canvasRef = useRef(null);
-  const particlesRef = useRef(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-    const rect = container.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
-    const count = 40;
-    const particles = [];
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: -0.15 - Math.random() * 0.35,
-        size: 0.8 + Math.random() * 1.6,
-        alpha: 0.12 + Math.random() * 0.45,
-        phase: Math.random() * Math.PI * 2,
-        color: i % 2 === 0 ? ACCENT_CYAN : ACCENT_PURPLE,
-      });
-    }
-    particlesRef.current = particles;
-  }, [containerRef]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const container = containerRef.current;
-    if (!canvas || !container) return;
+    if (!canvas) return;
     const ctx = canvas.getContext('2d');
     let raf;
 
     function resize() {
-      const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
+      const parent = canvas.parentElement;
+      if (parent) {
+        canvas.width = parent.clientWidth || 300;
+        canvas.height = parent.clientHeight || 400;
+      }
     }
     resize();
     window.addEventListener('resize', resize);
 
-    function render(time) {
-      const t = time * 0.001;
-      const particles = particlesRef.current;
-      if (!particles) { raf = requestAnimationFrame(render); return; }
+    const particles = Array.from({ length: 35 }, (_, i) => ({
+      x: Math.random() * (canvas.width || 300),
+      y: Math.random() * (canvas.height || 400),
+      vy: -0.2 - Math.random() * 0.4,
+      size: 1 + Math.random() * 1.5,
+      alpha: 0.15 + Math.random() * 0.45,
+      color: i % 2 === 0 ? ACCENT_CYAN : ACCENT_PURPLE,
+    }));
 
-      const w = canvas.width;
-      const h = canvas.height;
-      const mx = pointerRef.current.mx;
-      const my = pointerRef.current.my;
-      ctx.clearRect(0, 0, w, h);
-
+    function render() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (const p of particles) {
-        p.x += p.vx + Math.sin(t + p.phase) * 0.15 + mx * 0.2;
-        p.y += p.vy + my * 0.1;
-        if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
-        if (p.x < -5) p.x = w + 5;
-        if (p.x > w + 5) p.x = -5;
-        const flicker = 0.5 + Math.sin(t * 2.5 + p.phase * 3) * 0.5;
-        ctx.globalAlpha = p.alpha * flicker;
+        p.y += p.vy;
+        if (p.y < -5) p.y = canvas.height + 5;
+        ctx.globalAlpha = p.alpha;
         ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
@@ -77,220 +47,117 @@ function ParticlesOverlay({ pointerRef, containerRef }) {
       ctx.globalAlpha = 1;
       raf = requestAnimationFrame(render);
     }
-    raf = requestAnimationFrame(render);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize); };
-  }, [pointerRef, containerRef]);
+    render();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+    };
+  }, []);
 
   return (
     <canvas
       ref={canvasRef}
-      style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 }}
+      style={{
+        position: 'absolute',
+        inset: 0,
+        pointerEvents: 'none',
+        zIndex: 3,
+        width: '100%',
+        height: '100%',
+      }}
     />
   );
 }
 
-/* ─── Responsive hook ─── */
-function useResponsive() {
-  const [s, setS] = useState(() => ({
-    mobile: window.matchMedia('(max-width: 820px)').matches,
-    reduced: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  }));
-  useEffect(() => {
-    const mq1 = window.matchMedia('(max-width: 820px)');
-    const mq2 = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const u = () => setS({ mobile: mq1.matches, reduced: mq2.matches });
-    mq1.addEventListener('change', u);
-    mq2.addEventListener('change', u);
-    return () => { mq1.removeEventListener('change', u); mq2.removeEventListener('change', u); };
-  }, []);
-  return s;
-}
-
-/* ─── Synchronous base image path ─── */
-const base = import.meta.env.BASE_URL || '/';
-const cleanBase = base.endsWith('/') ? base : `${base}/`;
-const PORTRAIT_IMAGE_SRC = `${cleanBase}images/ashwin-portrait.jpeg`;
-
-/* ─── Main export ─── */
 export function HolographicPortrait() {
-  const stageRef = useRef(null);
-  const portraitGroupRef = useRef(null);
-  const parallaxRef = useRef(null);
-  const containerRef = useRef(null);
-  const pointerRef = useRef({ mx: 0, my: 0 });
-
-  const { reduced } = useResponsive();
-
-  /* GSAP scroll fade — Guaranteed restoration on load, refresh, scroll away, and scroll back */
-  useEffect(() => {
-    if (!stageRef.current) return undefined;
-    const stage = stageRef.current;
-    const about = document.querySelector('.about-section');
-    let ctx;
-
-    const setupScroll = () => {
-      if (ctx) { ctx.revert(); ctx = undefined; }
-      if (!portraitGroupRef.current) return;
-
-      // Always reset initial state on setup to prevent stale values
-      gsap.set(portraitGroupRef.current, { opacity: 1, y: 0, scale: 1, visibility: 'visible' });
-
-      if (reduced || !about) return;
-
-      ctx = gsap.context(() => {
-        gsap.fromTo(
-          portraitGroupRef.current,
-          { opacity: 1, y: 0, scale: 1 },
-          {
-            opacity: 0.15,
-            y: -35,
-            scale: 0.88,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: about,
-              start: 'top 85%',
-              end: 'top 35%',
-              scrub: true,
-              invalidateOnRefresh: true,
-              onLeaveBack: () => {
-                if (portraitGroupRef.current) {
-                  gsap.set(portraitGroupRef.current, { opacity: 1, y: 0, scale: 1, visibility: 'visible' });
-                }
-              },
-            },
-          }
-        );
-      }, stage);
-    };
-
-    setupScroll();
-    const onResize = () => setupScroll();
-    window.addEventListener('resize', onResize);
-    const mq = window.matchMedia('(max-width: 820px)');
-    mq.addEventListener('change', onResize);
-    return () => {
-      window.removeEventListener('resize', onResize);
-      mq.removeEventListener('change', onResize);
-      if (ctx) ctx.revert();
-    };
-  }, [reduced]);
-
-  /* Pointer tracking */
-  useEffect(() => {
-    if (!stageRef.current) return undefined;
-    const stage = stageRef.current;
-    const onPointerMove = (e) => {
-      const rect = stage.getBoundingClientRect();
-      pointerRef.current.mx = (e.clientX - rect.left) / rect.width - 0.5;
-      pointerRef.current.my = -(e.clientY - rect.top) / rect.height + 0.5;
-    };
-    const onPointerLeave = () => { pointerRef.current.mx = 0; pointerRef.current.my = 0; };
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-    stage.addEventListener('pointerleave', onPointerLeave);
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      stage.removeEventListener('pointerleave', onPointerLeave);
-    };
-  }, []);
-
-  /* Parallax tilt */
-  useEffect(() => {
-    if (reduced) return;
-    let raf;
-    function update() {
-      const el = parallaxRef.current;
-      if (el) {
-        const mx = pointerRef.current.mx;
-        const my = pointerRef.current.my;
-        el.style.transform = `translate(${mx * 10}px, ${my * 6}px)`;
-      }
-      raf = requestAnimationFrame(update);
-    }
-    raf = requestAnimationFrame(update);
-    return () => cancelAnimationFrame(raf);
-  }, [reduced]);
-
   return (
     <div
-      ref={stageRef}
       className="scene-stage holo-3d-stage"
-      aria-label="Holographic portrait of Ashwin Menon"
+      style={{
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        minHeight: '28rem',
+        opacity: 1,
+        visibility: 'visible',
+        zIndex: 10,
+      }}
     >
+      {/* Soft Ambient Radial Glow Behind Figure */}
       <div
-        ref={portraitGroupRef}
-        className="holo-3d-canvas-wrapper"
-        style={{ opacity: 1, visibility: 'visible' }}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: '-10%',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0, 240, 255, 0.2) 0%, rgba(168, 85, 247, 0.12) 45%, rgba(59, 130, 246, 0.05) 70%, transparent 88%)',
+          pointerEvents: 'none',
+          zIndex: 1,
+          filter: 'blur(24px)',
+        }}
+      />
+
+      {/* Main Holographic Profile Card */}
+      <div
+        className="portrait-hacker-card"
+        style={{
+          position: 'relative',
+          zIndex: 5,
+          opacity: 1,
+          visibility: 'visible',
+          display: 'block',
+          padding: '12px',
+          borderRadius: '24px',
+          background: 'rgba(14, 22, 40, 0.75)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(0, 240, 255, 0.25)',
+          boxShadow: '0 20px 50px -10px rgba(0, 0, 0, 0.75), 0 0 35px rgba(0, 240, 255, 0.2)',
+        }}
       >
-        <div
-          ref={parallaxRef}
+        {/* HUD Tech Corner Ticks */}
+        <div className="hud-corner hud-tl" />
+        <div className="hud-corner hud-tr" />
+        <div className="hud-corner hud-bl" />
+        <div className="hud-corner hud-br" />
+
+        {/* HUD Floating Data Badges */}
+        <div className="hud-tag hud-tag-top-left">[SYS_ID // 0x7F4A]</div>
+        <div className="hud-tag hud-tag-top-right">[STATUS: ACTIVE]</div>
+
+        {/* Profile Image Asset — Direct ESM Import */}
+        <img
+          src={portraitImg}
+          alt="Ashwin Menon"
+          draggable={false}
           style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
+            display: 'block',
+            position: 'relative',
+            zIndex: 10,
+            opacity: 1,
+            visibility: 'visible',
+            maxHeight: 'min(65vh, 580px)',
+            maxWidth: '100%',
+            objectFit: 'contain',
+            borderRadius: '16px',
+            filter: [
+              'drop-shadow(0 0 25px rgba(0, 240, 255, 0.4))',
+              'drop-shadow(0 0 50px rgba(168, 85, 247, 0.25))',
+            ].join(' '),
+            WebkitMaskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
+            maskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
           }}
-        >
-          {/* Portrait container */}
-          <div
-            ref={containerRef}
-            style={{ position: 'relative', lineHeight: 0, maxHeight: '100%' }}
-          >
-            {/* Holographic Ambient Glow Aura Behind Figure */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                inset: '-15%',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(0, 240, 255, 0.18) 0%, rgba(168, 85, 247, 0.12) 40%, rgba(59, 130, 246, 0.05) 65%, transparent 85%)',
-                pointerEvents: 'none',
-                zIndex: 0,
-                filter: 'blur(20px)',
-              }}
-            />
+        />
 
-            {/* BASE PORTRAIT — Clean isolation with cyan/purple rim glow */}
-            <div className="portrait-hacker-card">
-              {/* HUD Tech Corner Ticks */}
-              <div className="hud-corner hud-tl" />
-              <div className="hud-corner hud-tr" />
-              <div className="hud-corner hud-bl" />
-              <div className="hud-corner hud-br" />
-
-              {/* HUD Floating Data Badges */}
-              <div className="hud-tag hud-tag-top-left">[SYS_ID // 0x7F4A]</div>
-              <div className="hud-tag hud-tag-top-right">[STATUS: ACTIVE]</div>
-
-              <img
-                src={PORTRAIT_IMAGE_SRC}
-                alt="Ashwin Menon"
-                draggable={false}
-                style={{
-                  display: 'block',
-                  maxHeight: 'min(70vh, 600px)',
-                  maxWidth: '100%',
-                  objectFit: 'contain',
-                  filter: [
-                    'drop-shadow(0 0 25px rgba(0, 240, 255, 0.38))',
-                    'drop-shadow(0 0 50px rgba(168, 85, 247, 0.25))',
-                  ].join(' '),
-                  WebkitMaskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
-                  maskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
-                }}
-              />
-
-              {/* HUD Bottom Status Pill */}
-              <div className="hud-tag hud-tag-bottom">
-                <span className="hud-dot" /> SYS.ONLINE • ASHWIN MENON
-              </div>
-            </div>
-
-            {/* Floating cyan/purple particles */}
-            {!reduced && <ParticlesOverlay pointerRef={pointerRef} containerRef={containerRef} />}
-          </div>
+        {/* HUD Bottom Status Pill */}
+        <div className="hud-tag hud-tag-bottom">
+          <span className="hud-dot" /> SYS.ONLINE • ASHWIN MENON
         </div>
+
+        {/* Background Particles */}
+        <ParticlesOverlay />
       </div>
     </div>
   );
