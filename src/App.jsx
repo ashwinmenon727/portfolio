@@ -162,7 +162,7 @@ function App() {
         });
       }
 
-      const revealSections = mainRef.current ? Array.from(mainRef.current.querySelectorAll('.content-section, .hero-section')) : [];
+      const revealSections = mainRef.current ? Array.from(mainRef.current.querySelectorAll('.content-section')) : [];
       if (revealSections.length) {
         gsap.fromTo(
           revealSections,

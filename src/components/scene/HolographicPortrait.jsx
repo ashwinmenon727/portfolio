@@ -138,27 +138,25 @@ export function HolographicPortrait() {
 
     const setupScroll = () => {
       if (ctx) { ctx.revert(); ctx = undefined; }
-      if (!about) return;
+      if (!about || !portraitGroupRef.current) return;
       ctx = gsap.context(() => {
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: about,
-            start: 'top 85%',
-            end: 'top 30%',
-            scrub: true,
-          },
-        }).to(scrollFadeRef.current, {
-          opacity: 0.06,
-          y: -45,
-          scale: 0.82,
-          ease: 'none',
-          onUpdate() {
-            if (!portraitGroupRef.current) return;
-            const s = scrollFadeRef.current;
-            portraitGroupRef.current.style.opacity = s.opacity;
-            portraitGroupRef.current.style.transform = `translateY(${s.y}px) scale(${s.scale})`;
-          },
-        }, 0);
+        gsap.fromTo(
+          portraitGroupRef.current,
+          { opacity: 1, y: 0, scale: 1 },
+          {
+            opacity: 0.06,
+            y: -45,
+            scale: 0.82,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: about,
+              start: 'top 85%',
+              end: 'top 30%',
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          }
+        );
       }, stage);
     };
 
@@ -218,7 +216,7 @@ export function HolographicPortrait() {
       <div
         ref={portraitGroupRef}
         className="holo-3d-canvas-wrapper"
-        style={{ opacity: imgSrc ? 1 : 0, transition: 'opacity 600ms ease' }}
+        style={{ opacity: imgSrc ? 1 : 0, visibility: 'visible' }}
       >
         <div
           ref={parallaxRef}
