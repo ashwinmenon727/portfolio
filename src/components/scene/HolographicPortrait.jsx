@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import portraitImg from '/ashwin-portrait.jpg';
+import portraitImg from '../../assets/ashwin-portrait.jpg';
 
 const ACCENT_CYAN = '#00f0ff';
 const ACCENT_PURPLE = '#a855f7';
@@ -71,6 +71,10 @@ function ParticlesOverlay() {
 }
 
 export function HolographicPortrait() {
+  const fallbackBase = import.meta.env.BASE_URL || '/';
+  const cleanBase = fallbackBase.endsWith('/') ? fallbackBase : `${fallbackBase}/`;
+  const fallbackSrc = `${cleanBase}ashwin-portrait.jpg`;
+
   return (
     <div
       className="scene-stage holo-3d-stage"
@@ -127,11 +131,16 @@ export function HolographicPortrait() {
         <div className="hud-tag hud-tag-top-left">[SYS_ID // 0x7F4A]</div>
         <div className="hud-tag hud-tag-top-right">[STATUS: ACTIVE]</div>
 
-        {/* Profile Image Asset — Direct ESM Import */}
+        {/* Profile Image Asset — ESM Bundled with Vite Base URL resolution */}
         <img
           src={portraitImg}
           alt="Ashwin Menon"
           draggable={false}
+          onError={(e) => {
+            if (e.currentTarget.src !== fallbackSrc) {
+              e.currentTarget.src = fallbackSrc;
+            }
+          }}
           style={{
             display: 'block',
             position: 'relative',
