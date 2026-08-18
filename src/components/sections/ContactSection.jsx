@@ -1,10 +1,6 @@
 import { Code, Download, Github, Linkedin, Mail, Moon, SunMedium } from 'lucide-react';
-import { Suspense, lazy, useState } from 'react';
+import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
-
-const ContactCore = lazy(() =>
-  import('../scene/ContactCore.jsx').then((module) => ({ default: module.ContactCore })),
-);
 
 const EASE = [0.22, 1, 0.36, 1];
 
@@ -30,9 +26,6 @@ function ContactForm({ email }) {
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState('idle');
 
-  // Frontend-ready submission handler. No backend exists yet: this opens a
-  // pre-filled mailto draft. Swap the body below for a fetch() to your
-  // email service when one is connected.
   const submitMessage = (payload) => {
     const subject = encodeURIComponent(`Portfolio message from ${payload.name}`);
     const body = encodeURIComponent(`${payload.message}\n\n— ${payload.name}\n${payload.email}`);
@@ -55,9 +48,9 @@ function ContactForm({ email }) {
   };
 
   return (
-    <form className="contact-form" onSubmit={handleSubmit} noValidate>
+    <form className="minimal-contact-form" onSubmit={handleSubmit} noValidate>
       <div className="contact-field">
-        <label htmlFor="contact-name">Name</label>
+        <label htmlFor="contact-name">NAME</label>
         <input
           id="contact-name"
           type="text"
@@ -67,7 +60,7 @@ function ContactForm({ email }) {
           onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))}
           aria-invalid={Boolean(errors.name)}
           aria-describedby={errors.name ? 'contact-name-error' : undefined}
-          placeholder="Your name"
+          placeholder="Your Name"
         />
         {errors.name && (
           <small id="contact-name-error" role="alert">
@@ -77,7 +70,7 @@ function ContactForm({ email }) {
       </div>
 
       <div className="contact-field">
-        <label htmlFor="contact-email">Email</label>
+        <label htmlFor="contact-email">EMAIL</label>
         <input
           id="contact-email"
           type="email"
@@ -97,7 +90,7 @@ function ContactForm({ email }) {
       </div>
 
       <div className="contact-field">
-        <label htmlFor="contact-message">Message</label>
+        <label htmlFor="contact-message">MESSAGE</label>
         <textarea
           id="contact-message"
           name="message"
@@ -106,7 +99,7 @@ function ContactForm({ email }) {
           onChange={(event) => setValues((current) => ({ ...current, message: event.target.value }))}
           aria-invalid={Boolean(errors.message)}
           aria-describedby={errors.message ? 'contact-message-error' : undefined}
-          placeholder="Tell me about your project or opportunity"
+          placeholder="Tell me about your project or opportunity..."
         />
         {errors.message && (
           <small id="contact-message-error" role="alert">
@@ -116,12 +109,14 @@ function ContactForm({ email }) {
       </div>
 
       <div className="contact-form-actions">
-        <button type="submit" className="cta-magnetic">
-          SEND MESSAGE <span aria-hidden="true">→</span>
+        <button type="submit" className="btn-primary-cta">
+          SEND MESSAGE →
         </button>
-        <p className="form-success" aria-live="polite">
-          {status === 'sent' ? 'Thanks! Your message draft is ready.' : ''}
-        </p>
+        {status === 'sent' && (
+          <p className="form-success" role="status">
+            Message draft created in your mail client!
+          </p>
+        )}
       </div>
     </form>
   );
@@ -129,139 +124,85 @@ function ContactForm({ email }) {
 
 export function ContactSection({ developer, theme, onToggleTheme }) {
   const reduce = useReducedMotion();
-  const startHidden = (y = 40) => (reduce ? false : { y, opacity: 0 });
+  const startHidden = { y: 24, opacity: 0 };
   const reveal = { y: 0, opacity: 1 };
   const viewport = { once: true, amount: 0.25 };
 
   return (
-    <section className="contact-section" id="contact">
-      <Suspense fallback={null}>
-        <ContactCore />
-      </Suspense>
-
+    <section className="contact-section minimal-cta-section" id="contact">
       <div className="contact-layout">
         <motion.div
-          className="contact-intro"
-          initial={startHidden(54)}
+          className="contact-intro-col"
+          initial={reduce ? false : startHidden}
           whileInView={reveal}
           viewport={viewport}
-          transition={{ duration: 0.75, ease: EASE }}
+          transition={{ duration: 0.55, ease: EASE }}
         >
-          <p className="eyebrow">Let&apos;s build something</p>
-          <h2 className="contact-heading">AMAZING TOGETHER.</h2>
-          <p className="contact-description">
-            I&apos;m currently looking for software development, full-stack, and AI engineering
-            internship opportunities. If you have an interesting idea, project, or opportunity,
-            I&apos;d love to connect.
+          <span className="section-eyebrow">GET IN TOUCH</span>
+          <h2 className="cta-main-title">LET&apos;S BUILD SOMETHING GREAT.</h2>
+          <p className="cta-description-text">
+            I&apos;m currently open to software engineering, full-stack, and AI application developer roles.
+            Whether you have a project to build or an internship opportunity, feel free to reach out.
           </p>
-          <p className="contact-availability">
-            <span className="status-dot" aria-hidden="true" />
-            {developer.contact.availability}
-          </p>
+
+          <div className="contact-direct-links">
+            <a className="direct-link-item" href={`mailto:${developer.contact.email}`}>
+              <Mail size={18} /> {developer.contact.email}
+            </a>
+          </div>
+
+          <div className="contact-social-buttons">
+            <a href={developer.contact.github} target="_blank" rel="noreferrer" className="social-pill-btn">
+              <Github size={15} /> GitHub
+            </a>
+            <a href={developer.contact.linkedin} target="_blank" rel="noreferrer" className="social-pill-btn">
+              <Linkedin size={15} /> LinkedIn
+            </a>
+            <a href={developer.contact.leetcode} target="_blank" rel="noreferrer" className="social-pill-btn">
+              <Code size={15} /> LeetCode
+            </a>
+          </div>
         </motion.div>
 
         <motion.div
-          className="contact-card"
-          initial={reduce ? false : { y: 70, opacity: 0, rotateX: 10, rotateY: -6 }}
-          whileInView={{ y: 0, opacity: 1, rotateX: 0, rotateY: 0 }}
+          className="contact-card-box"
+          initial={reduce ? false : startHidden}
+          whileInView={reveal}
           viewport={viewport}
-          transition={{ duration: 0.85, delay: 0.12, ease: EASE }}
+          transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
         >
-          <div className="contact-card-head">
-            <p className="eyebrow">Get in touch</p>
+          <div className="contact-card-top">
+            <span className="card-top-title">Direct Contact</span>
             <button
               type="button"
-              className="theme-toggle"
-              aria-label="Toggle dark and light mode"
+              className="minimal-theme-toggle"
+              aria-label="Toggle theme"
               onClick={onToggleTheme}
             >
-              {theme === 'dark' ? <SunMedium size={18} /> : <Moon size={18} />}
-              <span>{theme === 'dark' ? 'Light' : 'Dark'} mode</span>
+              {theme === 'dark' ? <SunMedium size={16} /> : <Moon size={16} />}
+              <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
             </button>
           </div>
 
-          <a className="contact-email-link" href={`mailto:${developer.contact.email}`}>
-            <Mail size={16} aria-hidden="true" />
-            {developer.contact.email}
-          </a>
-
-          <div className="contact-actions" aria-label="Contact links">
-            <a
-              className="contact-button contact-button-primary"
-              href={`mailto:${developer.contact.email}`}
-            >
-              <Mail size={16} aria-hidden="true" />
-              Email Me
-            </a>
-            <a
-              className="contact-button contact-button-social"
-              href={developer.contact.github}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Github size={16} aria-hidden="true" />
-              GitHub
-            </a>
-            <a
-              className="contact-button contact-button-social"
-              href={developer.contact.linkedin}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Linkedin size={16} aria-hidden="true" />
-              LinkedIn
-            </a>
-            <a
-              className="contact-button contact-button-social"
-              href={developer.contact.leetcode}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Code size={16} aria-hidden="true" />
-              LeetCode
-            </a>
-          </div>
+          <ContactForm email={developer.contact.email} />
 
           <a
-            className="contact-button contact-button-resume"
+            className="download-resume-banner"
             href={developer.contact.resume}
             download="Ashwin_Menon_Resume.pdf"
           >
-            <Download size={16} aria-hidden="true" />
-            Download Resume
+            <Download size={16} /> Download Full Resume (PDF)
           </a>
-
-          <ContactForm email={developer.contact.email} />
         </motion.div>
       </div>
 
-      <motion.footer
-        className="site-footer contact-footer"
-        initial={startHidden(24)}
-        whileInView={reveal}
-        viewport={{ once: true, amount: 0.5 }}
-        transition={{ duration: 0.6, ease: EASE }}
-      >
-        <div>
-          <span>ASHWIN</span>
-          <span>AI Vibe Coder • Software Developer</span>
+      <footer className="minimal-site-footer">
+        <div className="footer-left">
+          <span className="footer-logo">ASHWIN</span>
+          <span className="footer-tagline">AI Vibe Coder • Software Developer</span>
         </div>
-        <div className="contact-footer-socials" aria-label="Developer profiles">
-          <a href={developer.contact.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <Github size={16} />
-          </a>
-          <a href={developer.contact.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-            <Linkedin size={16} />
-          </a>
-          <a href={developer.contact.leetcode} target="_blank" rel="noopener noreferrer" aria-label="LeetCode">
-            <Code size={16} />
-          </a>
-          <a href={`mailto:${developer.contact.email}`} aria-label="Email">
-            <Mail size={16} />
-          </a>
-        </div>
-        <p>© 2026 Ashwin Menon. Built with code + AI.</p>
-      </motion.footer>
+        <p className="footer-copy">© 2026 Ashwin Menon. All rights reserved.</p>
+      </footer>
     </section>
   );
 }

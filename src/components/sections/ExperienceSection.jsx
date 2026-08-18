@@ -1,50 +1,44 @@
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { useRef } from 'react';
+import { motion } from 'framer-motion';
 
 export function ExperienceSection({ items }) {
-  const ref = useRef(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start 75%', 'end 50%'],
-  });
-  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
   return (
-    <section className="content-section experience-section" id="experience" ref={ref}>
-      <div className="section-heading">
-        <p className="eyebrow">Timeline & Track Record</p>
-        <h2>Work Experience</h2>
+    <section className="content-section experience-section" id="experience">
+      <div className="section-header-row">
+        <div>
+          <span className="section-eyebrow">EXPERIENCE</span>
+          <h2 className="section-main-title">Work & Internships</h2>
+        </div>
       </div>
 
-      <div className="experience-timeline">
-        <div className="timeline-rail" aria-hidden="true">
-          <motion.span style={{ scaleY: lineScale }} />
-        </div>
+      <div className="minimal-timeline-container">
+        <div className="minimal-timeline-line" aria-hidden="true" />
 
         {items.map((item, index) => (
           <motion.article
-            className="experience-card"
+            className="minimal-timeline-item"
             key={`${item.year}-${item.role}`}
-            initial={{ y: 32, opacity: 0 }}
+            initial={{ y: 24, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.55, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.45, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="timeline-dot" />
+            <div className="timeline-node" />
 
-            <div className="timeline-header">
-              <span className="experience-year">{item.year}</span>
-              <h3 className="experience-role">{item.role}</h3>
-              <span className="experience-company">{item.company}</span>
+            <div className="timeline-meta-row">
+              <span className="timeline-year">{item.year}</span>
+              <span className="timeline-company">• {item.company}</span>
             </div>
 
-            <p className="experience-description">{item.description}</p>
+            <h3 className="timeline-role">{item.role}</h3>
+            <p className="timeline-desc">{item.description}</p>
 
-            <ul className="experience-tech-tags">
-              {item.technologies.map((technology) => (
-                <li key={technology}>{technology}</li>
+            <div className="timeline-tech-chips">
+              {item.technologies.map((tech) => (
+                <span key={tech} className="minimal-tech-chip">
+                  {tech}
+                </span>
               ))}
-            </ul>
+            </div>
           </motion.article>
         ))}
       </div>

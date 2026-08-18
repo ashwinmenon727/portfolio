@@ -14,35 +14,38 @@ const CATEGORY_ICONS = {
 export function TechStackSection({ technologies }) {
   return (
     <section className="content-section tech-stack-section" id="skills">
-      <div className="section-heading">
-        <p className="eyebrow">Skills & Capabilities</p>
-        <h2>Technical Stack</h2>
+      <div className="section-header-row">
+        <div>
+          <span className="section-eyebrow">SKILLS</span>
+          <h2 className="section-main-title">Technologies & Tools</h2>
+        </div>
       </div>
 
-      <div className="tech-categories-grid" aria-label="Technology categories">
+      <div className="minimal-skills-grid">
         {technologies.map((category, catIndex) => {
           const Icon = CATEGORY_ICONS[category.category] || Code;
           return (
             <motion.div
               key={category.category}
-              className="tech-category-card"
-              initial={{ y: 24, opacity: 0 }}
+              className="minimal-skill-group-card"
+              initial={{ y: 20, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.55, delay: catIndex * 0.07, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.45, delay: catIndex * 0.06, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="category-header">
-                <div className="category-icon-box">
-                  <Icon size={18} />
+              <div className="skill-group-header">
+                <div className="icon-badge">
+                  <Icon size={16} />
                 </div>
-                <h3 className="category-title">{category.category}</h3>
+                <h3 className="group-title">{category.category}</h3>
               </div>
 
-              <div className="tech-badges-list">
-                {category.items.map((tech) => (
-                  <span key={tech} className="tech-badge-item">
-                    <span className="badge-dot" /> {tech}
-                  </span>
+              <div className="skill-chips-flex">
+                {category.items.map((item) => (
+                  <div className="minimal-skill-item" key={item}>
+                    <span className="skill-dot" />
+                    <span>{item}</span>
+                  </div>
                 ))}
               </div>
             </motion.div>

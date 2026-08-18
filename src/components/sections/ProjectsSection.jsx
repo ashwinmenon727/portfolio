@@ -3,30 +3,14 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 
 function ProjectCard({ project, index, isFeatured, onSelect }) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
-  const onPointerMove = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width - 0.5;
-    const y = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: y * -6, y: x * 8 });
-  };
-
   return (
     <motion.article
       layout
-      className={`project-asymmetric-card ${isFeatured ? 'featured-card' : ''}`}
-      initial={{ opacity: 0, y: 28 }}
+      className={`minimal-project-card ${isFeatured ? 'featured-card' : ''}`}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.5, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-      style={{
-        rotateX: tilt.x,
-        rotateY: tilt.y,
-        transformStyle: 'preserve-3d',
-      }}
-      onPointerMove={onPointerMove}
-      onPointerLeave={() => setTilt({ x: 0, y: 0 })}
+      transition={{ duration: 0.45, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
       onClick={() => onSelect(project)}
       tabIndex={0}
       role="button"
@@ -36,33 +20,33 @@ function ProjectCard({ project, index, isFeatured, onSelect }) {
         }
       }}
     >
-      <div className="card-gradient-glow" />
-
       {isFeatured && (
-        <div className="featured-badge">
-          <Sparkles size={12} /> FEATURED BUILD
+        <div className="minimal-featured-pill">
+          <Sparkles size={13} /> Featured Project
         </div>
       )}
 
-      <div className="project-card-header">
-        <span className="project-category-tag">{project.category} // {project.year}</span>
-        <h3 className="project-title">{project.title}</h3>
+      <div className="project-header-row">
+        <span className="project-cat-label">{project.category} • {project.year}</span>
+        <h3 className="project-card-title">{project.title}</h3>
       </div>
 
-      <p className="project-summary">{project.description}</p>
+      <p className="project-card-desc">{project.description}</p>
 
-      <ul className="project-stack-tags">
+      <div className="project-tech-badges">
         {project.stack.map((item) => (
-          <li key={item}>{item}</li>
+          <span key={item} className="minimal-tech-chip">
+            {item}
+          </span>
         ))}
-      </ul>
+      </div>
 
-      <div className="project-card-links" onClick={(e) => e.stopPropagation()}>
-        <a href={project.github} target="_blank" rel="noreferrer" className="card-link">
-          <Github size={15} /> Code
+      <div className="project-card-actions" onClick={(e) => e.stopPropagation()}>
+        <a href={project.github} target="_blank" rel="noreferrer" className="btn-secondary-sm">
+          <Github size={14} /> GitHub
         </a>
-        <a href={project.demo} target="_blank" rel="noreferrer" className="card-link primary">
-          <ExternalLink size={15} /> Demo
+        <a href={project.demo} target="_blank" rel="noreferrer" className="btn-primary-sm">
+          <ExternalLink size={14} /> Live Demo
         </a>
       </div>
     </motion.article>
@@ -72,42 +56,42 @@ function ProjectCard({ project, index, isFeatured, onSelect }) {
 function ProjectModal({ project, onClose }) {
   return (
     <motion.div
-      className="project-modal-backdrop"
+      className="minimal-modal-backdrop"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
       <motion.article
-        className="project-modal"
-        initial={{ y: 36, opacity: 0, scale: 0.96 }}
+        className="minimal-modal-card"
+        initial={{ y: 28, opacity: 0, scale: 0.97 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 24, opacity: 0, scale: 0.97 }}
-        transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+        exit={{ y: 20, opacity: 0, scale: 0.98 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         onClick={(event) => event.stopPropagation()}
       >
-        <button type="button" className="modal-close" aria-label="Close project" onClick={onClose}>
+        <button type="button" className="modal-close-btn" aria-label="Close modal" onClick={onClose}>
           <X size={18} />
         </button>
 
-        <p className="eyebrow">{project.category} / {project.year}</p>
-        <h3>{project.title}</h3>
-        <p>{project.description}</p>
+        <span className="section-eyebrow">{project.category} / {project.year}</span>
+        <h3 className="modal-title">{project.title}</h3>
+        <p className="modal-desc">{project.description}</p>
 
-        <ul className="project-stack-tags">
+        <div className="project-tech-badges">
           {project.stack.map((item) => (
-            <li key={item}>{item}</li>
+            <span key={item} className="minimal-tech-chip">
+              {item}
+            </span>
           ))}
-        </ul>
+        </div>
 
-        <div className="modal-actions">
-          <a href={project.github} target="_blank" rel="noreferrer">
-            <Github size={18} aria-hidden="true" />
-            View Source Code
+        <div className="modal-actions-row">
+          <a href={project.github} target="_blank" rel="noreferrer" className="btn-secondary-sm">
+            <Github size={16} /> View GitHub
           </a>
-          <a href={project.demo} target="_blank" rel="noreferrer" className="primary">
-            <ExternalLink size={18} aria-hidden="true" />
-            Launch Live Demo
+          <a href={project.demo} target="_blank" rel="noreferrer" className="btn-primary-sm">
+            <ExternalLink size={16} /> Live Demo
           </a>
         </div>
       </motion.article>
@@ -135,16 +119,16 @@ export function ProjectsSection({ projects, filters }) {
 
   return (
     <section className="content-section projects-section" id="projects">
-      <div className="projects-header">
+      <div className="section-header-row">
         <div>
-          <p className="eyebrow">Selected Work</p>
-          <h2>PROJECT HIGHLIGHTS</h2>
+          <span className="section-eyebrow">PROJECTS</span>
+          <h2 className="section-main-title">Selected Projects</h2>
         </div>
 
-        <div className="project-filters" aria-label="Project filters">
+        <div className="minimal-filters-row" aria-label="Project filters">
           {filters.map((filter) => (
             <button
-              className={activeFilter === filter ? 'active' : ''}
+              className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
               key={filter}
               type="button"
               aria-pressed={activeFilter === filter}
@@ -156,7 +140,7 @@ export function ProjectsSection({ projects, filters }) {
         </div>
       </div>
 
-      <motion.div className="projects-asymmetric-grid" layout>
+      <motion.div className="minimal-projects-grid" layout>
         <AnimatePresence mode="popLayout">
           {filteredProjects.map((project, index) => (
             <ProjectCard
