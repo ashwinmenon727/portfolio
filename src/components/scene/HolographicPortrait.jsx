@@ -18,7 +18,7 @@ function ParticlesOverlay({ pointerRef, containerRef }) {
     const rect = container.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
-    const count = 45;
+    const count = 40;
     const particles = [];
     for (let i = 0; i < count; i++) {
       particles.push({
@@ -27,7 +27,7 @@ function ParticlesOverlay({ pointerRef, containerRef }) {
         vx: (Math.random() - 0.5) * 0.25,
         vy: -0.15 - Math.random() * 0.35,
         size: 0.8 + Math.random() * 1.6,
-        alpha: 0.1 + Math.random() * 0.45,
+        alpha: 0.12 + Math.random() * 0.45,
         phase: Math.random() * Math.PI * 2,
         color: i % 2 === 0 ? ACCENT_CYAN : ACCENT_PURPLE,
       });
@@ -106,55 +106,57 @@ function useResponsive() {
   return s;
 }
 
+/* ─── Synchronous base image path ─── */
+const base = import.meta.env.BASE_URL || '/';
+const cleanBase = base.endsWith('/') ? base : `${base}/`;
+const PORTRAIT_IMAGE_SRC = `${cleanBase}images/ashwin-portrait.jpeg`;
+
 /* ─── Main export ─── */
 export function HolographicPortrait() {
   const stageRef = useRef(null);
-  const portraitGroupRef = useRef();
+  const portraitGroupRef = useRef(null);
   const parallaxRef = useRef(null);
   const containerRef = useRef(null);
   const pointerRef = useRef({ mx: 0, my: 0 });
 
-  const [imgSrc, setImgSrc] = useState(null);
-  const { mobile, reduced } = useResponsive();
+  const { reduced } = useResponsive();
 
-  /* Load image */
+  /* GSAP scroll fade — Guaranteed restoration on load, refresh, scroll away, and scroll back */
   useEffect(() => {
-    let cancelled = false;
-    const base = import.meta.env.BASE_URL || '/';
-    const cleanBase = base.endsWith('/') ? base : `${base}/`;
-    const src = `${cleanBase}images/ashwin-portrait.jpeg`;
-    const img = new Image();
-    img.onload = () => { if (!cancelled) setImgSrc(src); };
-    img.onerror = () => {};
-    img.src = src;
-    return () => { cancelled = true; };
-  }, []);
-
-  /* GSAP scroll fade — robust restoration on scroll back up */
-  useEffect(() => {
-    if (reduced || !stageRef.current) return undefined;
+    if (!stageRef.current) return undefined;
     const stage = stageRef.current;
     const about = document.querySelector('.about-section');
     let ctx;
 
     const setupScroll = () => {
       if (ctx) { ctx.revert(); ctx = undefined; }
-      if (!about || !portraitGroupRef.current) return;
+      if (!portraitGroupRef.current) return;
+
+      // Always reset initial state on setup to prevent stale values
+      gsap.set(portraitGroupRef.current, { opacity: 1, y: 0, scale: 1, visibility: 'visible' });
+
+      if (reduced || !about) return;
+
       ctx = gsap.context(() => {
         gsap.fromTo(
           portraitGroupRef.current,
           { opacity: 1, y: 0, scale: 1 },
           {
-            opacity: 0.1,
-            y: -40,
-            scale: 0.85,
+            opacity: 0.15,
+            y: -35,
+            scale: 0.88,
             ease: 'none',
             scrollTrigger: {
               trigger: about,
               start: 'top 85%',
-              end: 'top 30%',
+              end: 'top 35%',
               scrub: true,
               invalidateOnRefresh: true,
+              onLeaveBack: () => {
+                if (portraitGroupRef.current) {
+                  gsap.set(portraitGroupRef.current, { opacity: 1, y: 0, scale: 1, visibility: 'visible' });
+                }
+              },
             },
           }
         );
@@ -193,7 +195,7 @@ export function HolographicPortrait() {
 
   /* Parallax tilt */
   useEffect(() => {
-    if (!imgSrc || reduced) return;
+    if (reduced) return;
     let raf;
     function update() {
       const el = parallaxRef.current;
@@ -206,7 +208,7 @@ export function HolographicPortrait() {
     }
     raf = requestAnimationFrame(update);
     return () => cancelAnimationFrame(raf);
-  }, [imgSrc, reduced]);
+  }, [reduced]);
 
   return (
     <div
@@ -217,7 +219,7 @@ export function HolographicPortrait() {
       <div
         ref={portraitGroupRef}
         className="holo-3d-canvas-wrapper"
-        style={{ opacity: imgSrc ? 1 : 0, visibility: 'visible' }}
+        style={{ opacity: 1, visibility: 'visible' }}
       >
         <div
           ref={parallaxRef}
@@ -242,7 +244,7 @@ export function HolographicPortrait() {
                 position: 'absolute',
                 inset: '-15%',
                 borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(0, 240, 255, 0.16) 0%, rgba(168, 85, 247, 0.10) 40%, rgba(59, 130, 246, 0.04) 65%, transparent 85%)',
+                background: 'radial-gradient(circle, rgba(0, 240, 255, 0.18) 0%, rgba(168, 85, 247, 0.12) 40%, rgba(59, 130, 246, 0.05) 65%, transparent 85%)',
                 pointerEvents: 'none',
                 zIndex: 0,
                 filter: 'blur(20px)',
@@ -250,54 +252,46 @@ export function HolographicPortrait() {
             />
 
             {/* BASE PORTRAIT — Clean isolation with cyan/purple rim glow */}
-            {imgSrc && (
-              <div className="portrait-hacker-card">
-                {/* HUD Tech Corner Ticks */}
-                <div className="hud-corner hud-tl" />
-                <div className="hud-corner hud-tr" />
-                <div className="hud-corner hud-bl" />
-                <div className="hud-corner hud-br" />
+            <div className="portrait-hacker-card">
+              {/* HUD Tech Corner Ticks */}
+              <div className="hud-corner hud-tl" />
+              <div className="hud-corner hud-tr" />
+              <div className="hud-corner hud-bl" />
+              <div className="hud-corner hud-br" />
 
-                {/* HUD Floating Data Badges */}
-                <div className="hud-tag hud-tag-top-left">[SYS_ID // 0x7F4A]</div>
-                <div className="hud-tag hud-tag-top-right">[STATUS: ACTIVE]</div>
+              {/* HUD Floating Data Badges */}
+              <div className="hud-tag hud-tag-top-left">[SYS_ID // 0x7F4A]</div>
+              <div className="hud-tag hud-tag-top-right">[STATUS: ACTIVE]</div>
 
-                <img
-                  src={imgSrc}
-                  alt="Ashwin Menon"
-                  draggable={false}
-                  style={{
-                    display: 'block',
-                    maxHeight: 'min(70vh, 600px)',
-                    maxWidth: '100%',
-                    objectFit: 'contain',
-                    filter: [
-                      'drop-shadow(0 0 25px rgba(0, 240, 255, 0.35))',
-                      'drop-shadow(0 0 50px rgba(168, 85, 247, 0.22))',
-                    ].join(' '),
-                    WebkitMaskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
-                    maskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
-                  }}
-                />
+              <img
+                src={PORTRAIT_IMAGE_SRC}
+                alt="Ashwin Menon"
+                draggable={false}
+                style={{
+                  display: 'block',
+                  maxHeight: 'min(70vh, 600px)',
+                  maxWidth: '100%',
+                  objectFit: 'contain',
+                  filter: [
+                    'drop-shadow(0 0 25px rgba(0, 240, 255, 0.38))',
+                    'drop-shadow(0 0 50px rgba(168, 85, 247, 0.25))',
+                  ].join(' '),
+                  WebkitMaskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
+                  maskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
+                }}
+              />
 
-                {/* HUD Bottom Status Pill */}
-                <div className="hud-tag hud-tag-bottom">
-                  <span className="hud-dot" /> SYS.ONLINE • ASHWIN MENON
-                </div>
+              {/* HUD Bottom Status Pill */}
+              <div className="hud-tag hud-tag-bottom">
+                <span className="hud-dot" /> SYS.ONLINE • ASHWIN MENON
               </div>
-            )}
+            </div>
 
             {/* Floating cyan/purple particles */}
             {!reduced && <ParticlesOverlay pointerRef={pointerRef} containerRef={containerRef} />}
           </div>
         </div>
       </div>
-
-      {!imgSrc && (
-        <div className="holo-3d-loading" aria-hidden="true">
-          <div className="holo-3d-loading-pulse" />
-        </div>
-      )}
     </div>
   );
 }
