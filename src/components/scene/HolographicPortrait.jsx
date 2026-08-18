@@ -4,7 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ACCENT = '#9df7cb';
+const ACCENT = '#2563eb';
 
 /* ─── Particles canvas — only floating dots, never touches the portrait ─── */
 function ParticlesOverlay({ pointerRef, containerRef }) {
@@ -236,93 +236,41 @@ export function HolographicPortrait() {
             ref={containerRef}
             style={{ position: 'relative', lineHeight: 0, maxHeight: '100%' }}
           >
-            {/* BASE PORTRAIT — plain <img>, cannot distort */}
+            {/* BASE PORTRAIT — Clean, crisp rendering without dark/green matrix filters */}
             {imgSrc && (
-              <img
-                src={imgSrc}
-                alt="Ashwin Menon"
-                draggable={false}
-                style={{
-                  display: 'block',
-                  maxHeight: 'min(78vh, 750px)',
-                  maxWidth: '100%',
-                  objectFit: 'contain',
-                  filter: [
-                    'grayscale(1)',
-                    'sepia(1)',
-                    'saturate(2.5)',
-                    'hue-rotate(130deg)',
-                    'brightness(1.05)',
-                    'contrast(1.2)',
-                    'drop-shadow(0 0 12px rgba(157,247,203,0.25))',
-                    'drop-shadow(0 0 30px rgba(157,247,203,0.10))',
-                  ].join(' '),
-                  /* Elliptical mask fades background edges, keeps person centered */
-                  WebkitMaskImage: 'radial-gradient(ellipse 70% 90% at 55% 48%, black 40%, transparent 75%)',
-                  maskImage: 'radial-gradient(ellipse 70% 90% at 55% 48%, black 40%, transparent 75%)',
-                }}
-              />
+              <div className="portrait-clean-card">
+                <img
+                  src={imgSrc}
+                  alt="Ashwin Menon"
+                  draggable={false}
+                  style={{
+                    display: 'block',
+                    maxHeight: 'min(70vh, 620px)',
+                    maxWidth: '100%',
+                    objectFit: 'contain',
+                    filter: 'drop-shadow(0 20px 35px rgba(15, 23, 42, 0.14))',
+                    WebkitMaskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
+                    maskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
+                    borderRadius: '24px',
+                  }}
+                />
+              </div>
             )}
 
-            {/* SCANLINES overlay — CSS pseudo via repeating gradient */}
+            {/* Soft Ambient Light Glow Ring */}
             <div
               aria-hidden="true"
               style={{
                 position: 'absolute',
-                inset: 0,
-                background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px)',
+                inset: '-10%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(6, 182, 212, 0.04) 50%, transparent 70%)',
                 pointerEvents: 'none',
-                animation: reduced ? 'none' : 'holo-scanline-scroll 6s linear infinite',
-                zIndex: 1,
+                zIndex: 0,
               }}
             />
 
-            {/* SCAN BEAM — slow sweeping translucent band */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                background: 'linear-gradient(180deg, transparent 0%, rgba(157,247,203,0.04) 48%, rgba(157,247,203,0.06) 50%, rgba(157,247,203,0.04) 52%, transparent 100%)',
-                backgroundSize: '100% 200%',
-                pointerEvents: 'none',
-                animation: reduced ? 'none' : 'holo-scan-beam 4s ease-in-out infinite',
-                zIndex: 2,
-              }}
-            />
-
-            {/* GRAIN overlay — CSS noise via tiny SVG filter */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                opacity: 0.08,
-                pointerEvents: 'none',
-                mixBlendMode: 'overlay',
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-                backgroundSize: '150px 150px',
-                animation: reduced ? 'none' : 'holo-grain-shift 0.5s steps(4) infinite',
-                zIndex: 2,
-              }}
-            />
-
-            {/* BOTTOM FADE — transparent gradient dissolve */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: '35%',
-                background: 'linear-gradient(to bottom, transparent 0%, rgba(10,10,10,0.5) 45%, rgba(10,10,10,0.97) 100%)',
-                pointerEvents: 'none',
-                zIndex: 2,
-              }}
-            />
-
-            {/* Particles — only canvas in the entire component, touches nothing */}
+            {/* Particles — Soft electric blue particles */}
             {!reduced && <ParticlesOverlay pointerRef={pointerRef} containerRef={containerRef} />}
           </div>
         </div>

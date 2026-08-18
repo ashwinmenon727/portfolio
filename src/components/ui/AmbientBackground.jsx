@@ -27,6 +27,8 @@ export function AmbientBackground() {
 
   return (
     <div className="ambient-background" aria-hidden="true">
+      <div className="ambient-orb orb-1" />
+      <div className="ambient-orb orb-2" />
       <div className="ambient-grid" />
       {particles.map((particle) => (
         <motion.span
@@ -37,9 +39,9 @@ export function AmbientBackground() {
             width: particle.size,
             height: particle.size,
           }}
-          animate={{ y: reducedMotion ? ['0vh', '0vh'] : ['105vh', '-10vh'], opacity: reducedMotion ? [0.25, 0.25] : [0, 0.5, 0] }}
+          animate={{ y: reducedMotion ? ['0vh', '0vh'] : ['105vh', '-10vh'], opacity: reducedMotion ? [0.15, 0.15] : [0, 0.35, 0] }}
           transition={{
-            duration: reducedMotion ? 0 : 14 + (particle.id % 5),
+            duration: reducedMotion ? 0 : 16 + (particle.id % 5),
             delay: reducedMotion ? 0 : particle.delay,
             repeat: reducedMotion ? 0 : Infinity,
             ease: 'linear',

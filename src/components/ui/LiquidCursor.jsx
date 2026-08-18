@@ -4,8 +4,8 @@ const POINTER_QUERY = '(pointer: fine)';
 const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 const LIQUID_CLICK_EVENT = 'liquid:click';
 
-const EMERALD = '157, 247, 203';
-const EMERALD_CYAN = '150, 235, 255';
+const EMERALD = '37, 99, 235';
+const EMERALD_CYAN = '6, 182, 212';
 
 const INTERACTIVE_SELECTOR = 'a, button, input, textarea, select, [data-cursor="interactive"]';
 const HOLOGRAM_SELECTOR = '.hologram-stage';

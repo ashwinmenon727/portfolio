@@ -75,25 +75,25 @@ function HolographicCore({ reduced }) {
       <mesh>
         <icosahedronGeometry args={[0.92, 1]} />
         <meshStandardMaterial
-          color="#9df7cb"
+          color="#2563eb"
           wireframe
           transparent
-          opacity={0.28}
-          emissive="#9df7cb"
-          emissiveIntensity={0.45}
+          opacity={0.35}
+          emissive="#06b6d4"
+          emissiveIntensity={0.35}
         />
       </mesh>
       <mesh ref={innerRef}>
         <icosahedronGeometry args={[0.5, 1]} />
-        <meshBasicMaterial color="#9df7cb" wireframe transparent opacity={0.18} />
+        <meshBasicMaterial color="#0284c7" wireframe transparent opacity={0.25} />
       </mesh>
       <mesh rotation={[0.6, 0.4, 0]}>
         <torusGeometry args={[1.25, 0.012, 8, 64]} />
-        <meshStandardMaterial color="#9df7cb" transparent opacity={0.35} emissive="#9df7cb" emissiveIntensity={0.6} />
+        <meshStandardMaterial color="#2563eb" transparent opacity={0.45} emissive="#3b82f6" emissiveIntensity={0.5} />
       </mesh>
       <mesh rotation={[-0.7, 0.2, 0.6]}>
         <torusGeometry args={[1.45, 0.008, 8, 64]} />
-        <meshStandardMaterial color="#ffffff" transparent opacity={0.14} />
+        <meshStandardMaterial color="#06b6d4" transparent opacity={0.28} />
       </mesh>
     </group>
   );
@@ -112,7 +112,7 @@ function CoreParticles({ count = 72 }) {
 
   return (
     <Points positions={positions} stride={3}>
-      <PointMaterial color="#9df7cb" size={0.022} transparent opacity={0.34} depthWrite={false} />
+      <PointMaterial color="#0284c7" size={0.022} transparent opacity={0.45} depthWrite={false} />
     </Points>
   );
 }
@@ -120,9 +120,9 @@ function CoreParticles({ count = 72 }) {
 function ContactScene({ reduced, mobile }) {
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3, 4, 4]} intensity={0.9} color="#dfffe9" />
-      <pointLight position={[-2, 1, 2]} color="#9df7cb" intensity={1.6} />
+      <ambientLight intensity={0.7} />
+      <directionalLight position={[3, 4, 4]} intensity={1.1} color="#e0f2fe" />
+      <pointLight position={[-2, 1, 2]} color="#38bdf8" intensity={1.8} />
       <Float speed={reduced ? 0 : 0.9} rotationIntensity={reduced ? 0 : 0.12} floatIntensity={reduced ? 0 : 0.2}>
         <HolographicCore reduced={reduced} />
       </Float>

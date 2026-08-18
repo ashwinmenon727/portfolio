@@ -90,7 +90,7 @@ function GitHubSection({ username }) {
 
 function App() {
   const mainRef = useRef(null);
-  const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'dark');
+  const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'light');
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
