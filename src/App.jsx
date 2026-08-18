@@ -287,20 +287,38 @@ function App() {
               <span className="status-dot" aria-hidden="true" /> SYSTEM ONLINE // AVAILABLE FOR OPPORTUNITIES
             </motion.p>
             <h1 className="hero-title" id="hero-title">
-              {["AI VIBE CODER &", 'SOFTWARE DEVELOPER'].map((line, index) => (
-                <motion.span
-                  key={line}
-                  initial={{ y: '110%', opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{
-                    duration: 0.72,
-                    delay: 0.12 + index * 0.12,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                >
-                  {line}
-                </motion.span>
-              ))}
+              <motion.span
+                className="hero-name-line hero-highlight"
+                initial={{ y: '110%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.72, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              >
+                AI VIBE
+              </motion.span>
+              <motion.span
+                className="hero-name-line"
+                initial={{ y: '110%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.72, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              >
+                CODER &
+              </motion.span>
+              <motion.span
+                className="hero-name-line"
+                initial={{ y: '110%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.72, delay: 0.32, ease: [0.22, 1, 0.36, 1] }}
+              >
+                SOFTWARE
+              </motion.span>
+              <motion.span
+                className="hero-name-line"
+                initial={{ y: '110%', opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.72, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              >
+                DEVELOPER
+              </motion.span>
             </h1>
             <motion.p
               className="hero-summary"
@@ -319,12 +337,21 @@ function App() {
                 <Mail aria-hidden="true" size={18} />
                 Download Resume
               </a>
+              <div className="hero-social-links" aria-label="Social profiles">
+                <a href={developer.github} target="_blank" rel="noreferrer" aria-label="GitHub">
+                  <Github size={18} />
+                </a>
+                <a href={developer.linkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn">
+                  <Linkedin size={18} />
+                </a>
+                <a href={developer.leetcode} target="_blank" rel="noreferrer" aria-label="LeetCode">
+                  <Code2 size={18} />
+                </a>
+              </div>
             </div>
           </section>
 
-          <Suspense fallback={<div className="scene-stage scene-stage-loading" aria-hidden="true" />}>
-            <HolographicPortrait />
-          </Suspense>
+          <HolographicPortrait />
         </div>
       </header>
 

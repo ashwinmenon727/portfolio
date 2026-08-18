@@ -1,80 +1,54 @@
+import { Code, Cpu, Database, Layout, Wrench } from 'lucide-react';
 import { motion } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useLayoutEffect, useRef } from 'react';
-import { SectionShell } from '../layout/SectionShell.jsx';
+
+const CATEGORY_ICONS = {
+  Languages: Code,
+  Frontend: Layout,
+  Backend: Cpu,
+  Databases: Database,
+  'AI / Development': Cpu,
+  Tools: Wrench,
+  'Core Concepts': Code,
+};
 
 export function TechStackSection({ technologies }) {
-  const shellRef = useRef(null);
-
-  useLayoutEffect(() => {
-    if (!shellRef.current) {
-      return undefined;
-    }
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        shellRef.current,
-        { opacity: 0.45, y: 32, scale: 0.96 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.8,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: shellRef.current,
-            start: 'top 78%',
-            once: true,
-          },
-        },
-      );
-    }, shellRef);
-
-    return () => {
-      ctx.revert();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [technologies]);
-
   return (
-    <SectionShell id="skills" eyebrow="Skills" title="Tech Stack">
-      <div ref={shellRef} className="tech-stack-shell">
-        <div className="tech-categories" aria-label="Technology categories and tools">
-          {technologies.map((category, catIndex) => (
+    <section className="content-section tech-stack-section" id="skills">
+      <div className="section-heading">
+        <p className="eyebrow">Skills & Capabilities</p>
+        <h2>Technical Stack</h2>
+      </div>
+
+      <div className="tech-categories-grid" aria-label="Technology categories">
+        {technologies.map((category, catIndex) => {
+          const Icon = CATEGORY_ICONS[category.category] || Code;
+          return (
             <motion.div
               key={category.category}
-              className="tech-category"
+              className="tech-category-card"
               initial={{ y: 24, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true, amount: 0.35 }}
-              transition={{ duration: 0.6, delay: catIndex * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.55, delay: catIndex * 0.07, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h3 className="category-title">{category.category}</h3>
-              <div className="tech-badges">
-                {category.items.map((tech, techIndex) => (
-                  <motion.span
-                    key={tech}
-                    className="tech-badge"
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    whileInView={{ scale: 1, opacity: 1 }}
-                    viewport={{ once: true, amount: 0.5 }}
-                    transition={{
-                      duration: 0.45,
-                      delay: catIndex * 0.08 + techIndex * 0.04,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                  >
-                    {tech}
-                  </motion.span>
+              <div className="category-header">
+                <div className="category-icon-box">
+                  <Icon size={18} />
+                </div>
+                <h3 className="category-title">{category.category}</h3>
+              </div>
+
+              <div className="tech-badges-list">
+                {category.items.map((tech) => (
+                  <span key={tech} className="tech-badge-item">
+                    <span className="badge-dot" /> {tech}
+                  </span>
                 ))}
               </div>
             </motion.div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    </SectionShell>
+    </section>
   );
 }
