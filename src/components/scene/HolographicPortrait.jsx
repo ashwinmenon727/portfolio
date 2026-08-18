@@ -119,10 +119,13 @@ export function HolographicPortrait() {
   /* Load image — use the original photo, skip the broken cutout */
   useEffect(() => {
     let cancelled = false;
+    const base = import.meta.env.BASE_URL || '/';
+    const cleanBase = base.endsWith('/') ? base : `${base}/`;
+    const src = `${cleanBase}images/ashwin-portrait.jpeg`;
     const img = new Image();
-    img.onload = () => { if (!cancelled) setImgSrc('/images/ashwin-portrait.jpeg'); };
+    img.onload = () => { if (!cancelled) setImgSrc(src); };
     img.onerror = () => {};
-    img.src = '/images/ashwin-portrait.jpeg';
+    img.src = src;
     return () => { cancelled = true; };
   }, []);
 

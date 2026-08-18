@@ -1,3 +1,7 @@
+const base = import.meta.env.BASE_URL || '/';
+const cleanBase = base.endsWith('/') ? base : `${base}/`;
+const resumePath = `${cleanBase}Ashwin_Menon_ATS_Optimized_Resume.pdf`;
+
 export const developer = {
   name: 'Ashwin Menon',
   role: 'AI Vibe Coder & Software Developer',
@@ -6,7 +10,7 @@ export const developer = {
   githubUsername: 'ashwinmenon727',
   linkedin: 'https://www.linkedin.com/in/ashwin-menon-3a175b377',
   leetcode: 'https://leetcode.com/u/ashwinmenon2006/',
-  resume: '/Ashwin_Menon_ATS_Optimized_Resume.pdf',
+  resume: resumePath,
   emailLabel: 'ashwinmenon2112@gmail.com',
   // CONTACT LINKS — edit these values to update the Contact section. The
   // resume file lives at /public/Ashwin_Menon_ATS_Optimized_Resume.pdf.
@@ -15,7 +19,7 @@ export const developer = {
     github: 'https://github.com/ashwinmenon727',
     linkedin: 'https://www.linkedin.com/in/ashwin-menon-3a175b377',
     leetcode: 'https://leetcode.com/u/ashwinmenon2006/',
-    resume: '/Ashwin_Menon_ATS_Optimized_Resume.pdf',
+    resume: resumePath,
     availability: 'AVAILABLE FOR INTERNSHIPS',
   },
   summary:
