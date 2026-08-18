@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Background Removal Tool</title>
+  <style>
+    body { font-family: system-ui; background: #111; color: #eee; text-align: center; padding: 40px; }
+    h1 { color: #9df7cb; }
+    #status { margin: 20px 0; font-size: 18px; min-height: 30px; }
+    canvas { max-width: 90vw; max-height: 70vh; border: 1px solid #333; margin: 10px; }
+    button { background: #9df7cb; color: #111; border: none; padding: 12px 28px; font-size: 16px;
+             border-radius: 6px; cursor: pointer; margin: 8px; font-weight: bold; }
+    button:hover { background: #b5fcd8; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .hidden { display: none; }
+    #progress { width: 80%; max-width: 400px; height: 6px; background: #333; border-radius: 3px;
+                margin: 10px auto; overflow: hidden; }
+    #progressBar { height: 100%; background: #9df7cb; width: 0%; transition: width 0.3s; }
+  </style>
+</head>
+<body>
+  <h1>Background Removal Tool</h1>
+  <p>Select your portrait photo to create a transparent cutout.</p>
+
+  <input type="file" id="fileInput" accept="image/*" />
+  <div id="status"></div>
+  <div id="progress" class="hidden"><div id="progressBar"></div></div>
+
+  <div id="results" class="hidden">
+    <p>Result:</p>
+    <canvas id="resultCanvas"></canvas>
+    <br>
+    <button id="downloadBtn">Download PNG</button>
+    <button id="retryBtn">Try Different Image</button>
+  </div>
+
+  <script type="module">
+    const fileInput = document.getElementById('fileInput');
+    const status = document.getElementById('status');
+    const progress = document.getElementById('progress');
+    const progressBar = document.getElementById('progressBar');
+    const results = document.getElementById('results');
+    const resultCanvas = document.getElementById('resultCanvas');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const retryBtn = document.getElementById('retryBtn');
+
+    let resultBlob = null;
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      status.textContent = 'Loading background removal model...';
+      progress.classList.remove('hidden');
+      progressBar.style.width = '0%';
+      results.classList.add('hidden');
+      fileInput.disabled = true;
+
+      try {
+        const { removeBackground } = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.15/+esm');
+
+        status.textContent = 'Processing image (this may take 30-60 seconds)...';
+
+        const imageBlob = new Blob([await file.arrayBuffer()], { type: file.type });
+
+        resultBlob = await removeBackground(imageBlob, {
+          progress: (key, current, total) => {
+            if (total > 0) {
+              const pct = Math.round((current / total) * 100);
+              progressBar.style.width = pct + '%';
+              status.textContent = `Downloading model: ${pct}%`;
+            }
+          },
+        });
+
+        status.textContent = 'Done! Right-click the image to save, or click Download.';
+
+        // Draw result on canvas
+        const url = URL.createObjectURL(resultBlob);
+        const img = new Image();
+        img.onload = () => {
+          resultCanvas.width = img.width;
+          resultCanvas.height = img.height;
+          resultCanvas.getContext('2d').drawImage(img, 0, 0);
+          results.classList.remove('hidden');
+          progressBar.style.width = '100%';
+        };
+        img.src = url;
+
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        console.error(err);
+      } finally {
+        fileInput.disabled = false;
+      }
+    });
+
+    downloadBtn.addEventListener('click', () => {
+      if (!resultBlob) return;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(resultBlob);
+      a.download = 'ashwin-cutout.png';
+      a.click();
+    });
+
+    retryBtn.addEventListener('click', () => {
+      results.classList.add('hidden');
+      status.textContent = '';
+      progressBar.style.width = '0%';
+      fileInput.value = '';
+    });
+  </script>
+</body>
+</html>
