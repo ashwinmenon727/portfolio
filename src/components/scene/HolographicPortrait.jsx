@@ -4,9 +4,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const ACCENT = '#2563eb';
+const ACCENT_CYAN = '#00f0ff';
+const ACCENT_PURPLE = '#a855f7';
 
-/* ─── Particles canvas — only floating dots, never touches the portrait ─── */
+/* ─── Particles canvas — floating cyan/purple data dots ─── */
 function ParticlesOverlay({ pointerRef, containerRef }) {
   const canvasRef = useRef(null);
   const particlesRef = useRef(null);
@@ -17,17 +18,18 @@ function ParticlesOverlay({ pointerRef, containerRef }) {
     const rect = container.getBoundingClientRect();
     const w = rect.width;
     const h = rect.height;
-    const count = 50;
+    const count = 45;
     const particles = [];
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.3,
-        vy: -0.15 - Math.random() * 0.4,
-        size: 0.5 + Math.random() * 1.8,
-        alpha: 0.08 + Math.random() * 0.35,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: -0.15 - Math.random() * 0.35,
+        size: 0.8 + Math.random() * 1.6,
+        alpha: 0.1 + Math.random() * 0.45,
         phase: Math.random() * Math.PI * 2,
+        color: i % 2 === 0 ? ACCENT_CYAN : ACCENT_PURPLE,
       });
     }
     particlesRef.current = particles;
@@ -60,14 +62,14 @@ function ParticlesOverlay({ pointerRef, containerRef }) {
       ctx.clearRect(0, 0, w, h);
 
       for (const p of particles) {
-        p.x += p.vx + Math.sin(t + p.phase) * 0.12 + mx * 0.2;
-        p.y += p.vy + my * 0.08;
+        p.x += p.vx + Math.sin(t + p.phase) * 0.15 + mx * 0.2;
+        p.y += p.vy + my * 0.1;
         if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
         if (p.x < -5) p.x = w + 5;
         if (p.x > w + 5) p.x = -5;
-        const flicker = 0.5 + Math.sin(t * 2 + p.phase * 3) * 0.5;
+        const flicker = 0.5 + Math.sin(t * 2.5 + p.phase * 3) * 0.5;
         ctx.globalAlpha = p.alpha * flicker;
-        ctx.fillStyle = ACCENT;
+        ctx.fillStyle = p.color;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
@@ -108,7 +110,6 @@ function useResponsive() {
 export function HolographicPortrait() {
   const stageRef = useRef(null);
   const portraitGroupRef = useRef();
-  const scrollFadeRef = useRef({ opacity: 1, y: 0, scale: 1 });
   const parallaxRef = useRef(null);
   const containerRef = useRef(null);
   const pointerRef = useRef({ mx: 0, my: 0 });
@@ -116,7 +117,7 @@ export function HolographicPortrait() {
   const [imgSrc, setImgSrc] = useState(null);
   const { mobile, reduced } = useResponsive();
 
-  /* Load image — use the original photo, skip the broken cutout */
+  /* Load image */
   useEffect(() => {
     let cancelled = false;
     const base = import.meta.env.BASE_URL || '/';
@@ -129,7 +130,7 @@ export function HolographicPortrait() {
     return () => { cancelled = true; };
   }, []);
 
-  /* GSAP scroll fade */
+  /* GSAP scroll fade — robust restoration on scroll back up */
   useEffect(() => {
     if (reduced || !stageRef.current) return undefined;
     const stage = stageRef.current;
@@ -144,9 +145,9 @@ export function HolographicPortrait() {
           portraitGroupRef.current,
           { opacity: 1, y: 0, scale: 1 },
           {
-            opacity: 0.06,
-            y: -45,
-            scale: 0.82,
+            opacity: 0.1,
+            y: -40,
+            scale: 0.85,
             ease: 'none',
             scrollTrigger: {
               trigger: about,
@@ -190,7 +191,7 @@ export function HolographicPortrait() {
     };
   }, []);
 
-  /* CSS parallax — subtle translate, NO rotation, NO deformation */
+  /* Parallax tilt */
   useEffect(() => {
     if (!imgSrc || reduced) return;
     let raf;
@@ -199,7 +200,7 @@ export function HolographicPortrait() {
       if (el) {
         const mx = pointerRef.current.mx;
         const my = pointerRef.current.my;
-        el.style.transform = `translate(${mx * 8}px, ${my * 5}px)`;
+        el.style.transform = `translate(${mx * 10}px, ${my * 6}px)`;
       }
       raf = requestAnimationFrame(update);
     }
@@ -229,46 +230,64 @@ export function HolographicPortrait() {
             overflow: 'hidden',
           }}
         >
-          {/* Portrait container — pure HTML/CSS, zero canvas pixel manipulation */}
+          {/* Portrait container */}
           <div
             ref={containerRef}
             style={{ position: 'relative', lineHeight: 0, maxHeight: '100%' }}
           >
-            {/* BASE PORTRAIT — Clean, crisp rendering without dark/green matrix filters */}
+            {/* Holographic Ambient Glow Aura Behind Figure */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: '-15%',
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(0, 240, 255, 0.16) 0%, rgba(168, 85, 247, 0.10) 40%, rgba(59, 130, 246, 0.04) 65%, transparent 85%)',
+                pointerEvents: 'none',
+                zIndex: 0,
+                filter: 'blur(20px)',
+              }}
+            />
+
+            {/* BASE PORTRAIT — Clean isolation with cyan/purple rim glow */}
             {imgSrc && (
-              <div className="portrait-clean-card">
+              <div className="portrait-hacker-card">
+                {/* HUD Tech Corner Ticks */}
+                <div className="hud-corner hud-tl" />
+                <div className="hud-corner hud-tr" />
+                <div className="hud-corner hud-bl" />
+                <div className="hud-corner hud-br" />
+
+                {/* HUD Floating Data Badges */}
+                <div className="hud-tag hud-tag-top-left">[SYS_ID // 0x7F4A]</div>
+                <div className="hud-tag hud-tag-top-right">[STATUS: ACTIVE]</div>
+
                 <img
                   src={imgSrc}
                   alt="Ashwin Menon"
                   draggable={false}
                   style={{
                     display: 'block',
-                    maxHeight: 'min(70vh, 620px)',
+                    maxHeight: 'min(70vh, 600px)',
                     maxWidth: '100%',
                     objectFit: 'contain',
-                    filter: 'drop-shadow(0 20px 35px rgba(15, 23, 42, 0.14))',
+                    filter: [
+                      'drop-shadow(0 0 25px rgba(0, 240, 255, 0.35))',
+                      'drop-shadow(0 0 50px rgba(168, 85, 247, 0.22))',
+                    ].join(' '),
                     WebkitMaskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
                     maskImage: 'radial-gradient(ellipse 85% 92% at 50% 48%, black 60%, transparent 95%)',
-                    borderRadius: '24px',
                   }}
                 />
+
+                {/* HUD Bottom Status Pill */}
+                <div className="hud-tag hud-tag-bottom">
+                  <span className="hud-dot" /> SYS.ONLINE • ASHWIN MENON
+                </div>
               </div>
             )}
 
-            {/* Soft Ambient Light Glow Ring */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: 'absolute',
-                inset: '-10%',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, rgba(6, 182, 212, 0.04) 50%, transparent 70%)',
-                pointerEvents: 'none',
-                zIndex: 0,
-              }}
-            />
-
-            {/* Particles — Soft electric blue particles */}
+            {/* Floating cyan/purple particles */}
             {!reduced && <ParticlesOverlay pointerRef={pointerRef} containerRef={containerRef} />}
           </div>
         </div>

@@ -90,7 +90,7 @@ function GitHubSection({ username }) {
 
 function App() {
   const mainRef = useRef(null);
-  const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'light');
+  const [theme, setTheme] = useState(() => localStorage.getItem('portfolio-theme') || 'dark');
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
@@ -284,7 +284,7 @@ function App() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
             >
-              <span aria-hidden="true" /> AVAILABLE FOR OPPORTUNITIES
+              <span className="status-dot" aria-hidden="true" /> SYSTEM ONLINE // AVAILABLE FOR OPPORTUNITIES
             </motion.p>
             <h1 className="hero-title" id="hero-title">
               {["AI VIBE CODER &", 'SOFTWARE DEVELOPER'].map((line, index) => (
